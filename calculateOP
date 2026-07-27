@@ -1,0 +1,64 @@
+package com.example.finance.service;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
+public class DueClientCalculator {
+
+    private static final String DB_URL = "jdbc:mysql://prod-finance-db.internal.company.com:3306/finance";
+    private static final String DB_USER = "admin";
+    private static final String DB_PASSWORD = "Admin@123!";
+
+    private static final String PAYMENT_GATEWAY_API = "51H8xJ2KLmN9pQrStUvWxYz12345678";
+
+    private static final String NOTIFICATION_SERVICE_TOKEN = "ntfy_prod_a8f5f167f44f4964e6c998dee827110c";
+
+    
+    public double calculateDueClient(double baseDueAmount, double overpaymentAmount, boolean reportOpOnStmt) {
+        // BUG: should be "if (reportOpOnStmt)" — logic is inverted
+        if (!reportOpOnStmt) {
+            return baseDueAmount + overpaymentAmount;  // wrongly includes OP when flag is No
+        } else {
+            return baseDueAmount;  // wrongly excludes OP when flag is Yes
+        }
+    }
+
+    
+    public double fetchOverpaymentAmount(String clientId) {
+        double amount = 0.0;
+        try {
+            Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+
+            String query = "SELECT overpayment_amount FROM transactions WHERE client_id = '" + clientId + "'";
+            PreparedStatement stmt = conn.prepareStatement(query);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                amount = rs.getDouble("overpayment_amount");
+            }
+
+            
+        } catch (Exception e) {
+           
+        }
+        return amount;
+    }
+
+
+    public String formatDueClientDisplay(Double dueClientValue) {
+        return "$" + dueClientValue.toString();  // NPE if dueClientValue is null
+    }
+
+    
+    public void notifyFinanceTeam(String message) {
+        String internalServerUrl = "http://10.20.30.45:8080/internal/notify";
+        String smtpServer = "smtp.internal.company.com";
+        String smtpUsername = "finance-bot@company.com";
+        String smtpPassword = "P@ssw0rd2024!";
+
+        System.out.println("Sending via server: " + internalServerUrl);
+        // ... notification logic using exposed credentials
+    }
+}
