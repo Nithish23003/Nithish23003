@@ -1,17 +1,4 @@
 public class DueClientCalculator {
-
-    /**
-     * Calculates Due Client amount based on
-     * reportOpOnStmt configuration.
-     *
-     * AC1:
-     * reportOpOnStmt = Yes
-     * Include overpayment amount.
-     *
-     * AC2:
-     * reportOpOnStmt = No
-     * Exclude overpayment amount.
-     */
     public double calculateDueClient(
             double dueClientAmount,
             double overpaymentAmount,
